@@ -1,7 +1,7 @@
 import React, { FC } from 'react'
 
 import { MovieForm } from '@/components/movie-form'
-import { Movie } from '@prisma/client'
+import { prisma } from '@/lib/db'
 
 type Props = {
   params: {
@@ -11,9 +11,16 @@ type Props = {
 
 export const dynamic = 'force-dynamic'
 
+async function getMovie(id: string) {
+  const movie = await prisma.movie.findFirstOrThrow({
+    where: { id: +id },
+  })
+
+  return movie
+}
+
 const MoviePage: FC<Props> = async ({ params: { id } }) => {
-  const rsp = await fetch(`http://localhost:3000/api/movies/${id}`)
-  const movie = (await rsp.json()) as Movie
+  const movie = await getMovie(id)
 
   if (!movie) {
     return (

@@ -8,6 +8,8 @@ type Props = {
   }
 }
 
+export const dynamic = 'force-dynamic'
+
 export default async function MoviesPage({ searchParams: { genre } }: Props) {
   const url = genre ? `/api/movies?genre=${genre}` : '/api/movies'
   const rsp = await fetch(`http://localhost:3000${url}`)

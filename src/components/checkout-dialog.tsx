@@ -1,3 +1,4 @@
+import { useTransition } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import {
@@ -40,6 +41,7 @@ export function CheckoutDialog({
   clearCart,
   movies,
 }: Props) {
+  const [isPending, startTransition] = useTransition()
   const totalAmount = movies.length * 9.99
   const { toast } = useToast()
   const form = useForm<CheckoutForm>({
@@ -51,27 +53,29 @@ export function CheckoutDialog({
   })
 
   const onSubmit = async (data: CheckoutForm) => {
-    try {
-      checkoutShoppingCart({
-        account: data.account,
-        customerName: data.name,
-        movies,
-      })
-      toast({
-        title: 'Success',
-        description: 'Checkout completed',
-      })
-      setCheckoutOpen(false)
-      clearCart()
-    } catch (error) {
-      const description =
-        error instanceof Error ? error.message : 'Something went wrong'
-      toast({
-        title: 'Oops',
-        description,
-        variant: 'destructive',
-      })
-    }
+    startTransition(async () => {
+      try {
+        await checkoutShoppingCart({
+          account: data.account,
+          customerName: data.name,
+          movies,
+        })
+        toast({
+          title: 'Success',
+          description: 'Checkout completed',
+        })
+        setCheckoutOpen(false)
+        clearCart()
+      } catch (error) {
+        const description =
+          error instanceof Error ? error.message : 'Something went wrong'
+        toast({
+          title: 'Oops',
+          description,
+          variant: 'destructive',
+        })
+      }
+    })
   }
 
   return (
@@ -121,7 +125,9 @@ export function CheckoutDialog({
             </FormItem>
 
             <DialogFooter>
-              <Button type="submit">OK</Button>
+              <Button type="submit" disabled={isPending}>
+                OK
+              </Button>
             </DialogFooter>
           </form>
         </Form>

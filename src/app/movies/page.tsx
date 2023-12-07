@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 
 import { MovieCard } from '@/components/movie-card'
 import { prisma } from '@/lib/db'
+import { sleep } from '@/lib/utils'
 
 type MovieForCard = ComponentProps<typeof MovieCard>['movie']
 
@@ -15,6 +16,8 @@ type Props = {
 export const dynamic = 'force-dynamic'
 
 async function getMovies(genreId: string | undefined): Promise<MovieForCard[]> {
+  // await sleep(1_000)
+
   const select = {
     id: true,
     title: true,

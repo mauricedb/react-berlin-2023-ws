@@ -1,7 +1,10 @@
+import { ComponentProps } from 'react'
 import { Prisma } from '@prisma/client'
 
 import { MovieCard } from '@/components/movie-card'
 import { prisma } from '@/lib/db'
+
+type MovieForCard = ComponentProps<typeof MovieCard>['movie']
 
 type Props = {
   searchParams: {
@@ -11,7 +14,16 @@ type Props = {
 
 export const dynamic = 'force-dynamic'
 
-async function getMovies(genreId: string | undefined) {
+async function getMovies(genreId: string | undefined): Promise<MovieForCard[]> {
+  const select = {
+    id: true,
+    title: true,
+    overview: true,
+    backdropPath: true,
+    voteAverage: true,
+    voteCount: true,
+  } satisfies Prisma.MovieSelect
+
   const orderBy: Prisma.MovieOrderByWithRelationInput = {
     voteAverage: 'desc',
   } as const
@@ -21,6 +33,7 @@ async function getMovies(genreId: string | undefined) {
       where: { id: +genreId },
       include: {
         movies: {
+          select,
           orderBy,
         },
       },
@@ -29,6 +42,7 @@ async function getMovies(genreId: string | undefined) {
     return genre?.movies ?? []
   } else {
     const movies = await prisma.movie.findMany({
+      select,
       orderBy,
     })
 
